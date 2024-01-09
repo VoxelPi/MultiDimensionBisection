@@ -94,5 +94,5 @@ def bisection1(F, dF, K_0, delta=1e-6, max_iterations = 1000):
         dF_inv_center = np.linalg.inv(dF_center)
         G = lambda x : dF_inv_center @ F(x) # noqa: E731
 
-    print(f"Found root: iteratin={iteration} tries={tries} error={error}")
+    print(f"Found root: iteration={iteration} tries={tries} error={error}")
     return center

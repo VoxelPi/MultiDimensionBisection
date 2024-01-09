@@ -3,7 +3,7 @@ import numpy as np
 # Returns the sign of the given function on the given interval between a and b.
 # If the sign of the function varies between a and b, nan is returned.
 # signeval in paper/89
-def interval_sign(f, a, b, density = 100):
+def interval_sign(f, a, b, density = 10):
     x = np.linspace(start=a, stop=b, num=density) #int(np.ceil(interval_density * (b - a)))
     fx = np.vectorize(f)(x)
     min = np.min(fx)

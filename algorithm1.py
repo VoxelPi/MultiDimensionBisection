@@ -66,6 +66,7 @@ def bisection1(F, dF, K_0, delta=1e-6, max_iterations = 1000):
         print("Invalid initial configuration")
         return np.nan
     
+    # Initialization
     center = refinement_center(K_0)
     error = np.linalg.norm(F(center), np.inf)
     iteration = 0
@@ -73,10 +74,12 @@ def bisection1(F, dF, K_0, delta=1e-6, max_iterations = 1000):
     G = F
     K = K_0
 
+    # Iteration
     while error > delta and tries < 2 and iteration < max_iterations:
         iteration += 1
         tries += 1
-        # print(f"Start of iteration {iteration}")
+
+        # Find refinement
         refinements = generate_refinements(K)
         for refinement in refinements:
             if satisfies_PM(G, refinement):
@@ -84,14 +87,12 @@ def bisection1(F, dF, K_0, delta=1e-6, max_iterations = 1000):
                 K = refinement
                 error = np.linalg.norm(F(center), np.inf)
                 tries -= 1
-                # print(f"  Found refinement {index}")
                 break # Go to next iteration.
 
-        # Precondition
+        # Apply precondition
         dF_center = dF(center)
         dF_inv_center = np.linalg.inv(dF_center)
         G = lambda x : dF_inv_center @ F(x) # noqa: E731
-        # print("  Applied preconditioning.")
 
     print(f"Found root: iteratin={iteration} tries={tries} error={error}")
     return center

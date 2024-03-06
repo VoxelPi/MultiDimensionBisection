@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.spatial import Delaunay
-import matplotlib.pyplot as plt
 
 # F(X) = F(x, y) = (f(x, y), g(x, y))
 
@@ -31,12 +30,7 @@ def calculate_d(F, polygon):
     return sum
         
 def triangulate_polygon(polygon: np.ndarray[float]) -> np.ndarray[float]:
-    # tri = Delaunay(initial_boundary)
-    # print(tri.simplices)
-    # plt.triplot(initial_boundary[:,0], initial_boundary[:,1], tri.simplices)
-    # plt.show()
-
-    simplices = Delaunay(initial_boundary).simplices
+    simplices = Delaunay(polygon).simplices
     return np.array([(polygon[i_0], polygon[i_1], polygon[i_2]) for [i_0,i_1,i_2] in simplices])
 
 # Bisection algorithm 2.
@@ -147,7 +141,7 @@ def bisection2(F, polygon: np.ndarray[float], epsilon = 1e-9):
 
             # Check if tolerance is reached.
             if l_max < epsilon:
-                return (triangle, F_triangle, l_max)
+                return (triangle, F_triangle, l_max, triangles)
 
             # STEP 6
             # Bisect triangle.
@@ -166,7 +160,7 @@ def bisection2(F, polygon: np.ndarray[float], epsilon = 1e-9):
 
         # STATE 10
         # Bisect every triangle and start again.
-        print(f"[STATE 10] Bisecting every triangle {n_triangles=}")
+        # print(f"[STATE 10] Bisecting every triangle {n_triangles=}")
         new_triangles = []
         for triangle in triangles:
             # Calculate the triangle edge lenghts and find the longest. 
@@ -184,22 +178,3 @@ def bisection2(F, polygon: np.ndarray[float], epsilon = 1e-9):
         n_triangles *= 2
 
     return np.nan
-
-# Example function
-def F(x):
-    return np.array([x[0]**2 - 4*x[1], x[1]**2 - 2*x[0] + 4*x[1]])
-
-initial_boundary = np.array([
-    [-0.5,   0.25], #1
-    [-2.0,   0.25], #2
-    [-2.0,  -0.25], #3
-    [ 0.75, -0.25], #4
-    [ 2.0,  -0.25], #5
-    [ 2.0,   0.25], #6
-    [ 0.75,  0.25], #7
-])
-
-(x,f,l) = bisection2(F, initial_boundary, epsilon=0.001)
-print(x)
-print(f)
-print(l)

@@ -27,7 +27,6 @@ def bisection3_1d(f, x0: float, h: float, epsillon: float) -> float:
         return None
     return x_n
 
-# Algorithm 3.2 (Creating an admissible n-polygon)
 def construct_admissible_polygon(F, epsillon: float, x0: NDArray[np.floating], h: NDArray[np.floating]) -> NDArray[np.floating]:
     # Step 1.
     n = x0.shape[0]
@@ -141,14 +140,63 @@ def construct_admissible_polygon(F, epsillon: float, x0: NDArray[np.floating], h
 
     return A
 
+def calculate_diameter(P, n: int) -> float:
+    diameter = 0
+    for i in range(2**(n-1)):
+        x_a = P[i]
+        x_b = P[2**n - i - 1]
+        d = np.linalg.norm(x_a - x_b)
+        if d > diameter:
+            diameter = d
+    return diameter
+
 # Bisection algorithm 3.
-def bisection3(F, epsilon = 1e-9):
-    # Form the intial system
+def bisection3(F, n: int, initial_admissible_polygon, epsilon = 1e-3):
+    P = np.copy(initial_admissible_polygon)
+    while calculate_diameter(P, n) > epsilon:
+        for i in range(2**n):
+            x_i = P[i]
+            sign_F_i = vector_sign(F, x_i)
+            for j in range(i+1, 2**n):
+                x_j = P[j]
+                sign_F_j = vector_sign(F, x_j)
 
-    return np.nan
+                # Check for sign change.
+                k_sign_change = None
+                for k in range(n):
+                    if (sign_F_i[k] == sign_F_j[k]):
+                        continue
+                    else:
+                        if k_sign_change is None:
+                            # No change found until now, save k and look if there are other sign changes.
+                            k_sign_change = k
+                            continue
+                        else:
+                            # A sign change has already happened, so this simplex is not proper.
+                            k_sign_change = None
+                            break
+                
+                # If the 1-simplex is proper k_sign_change is set to the index where the change in sign happens.
+                # Otherwise k_sign_change is set to None, and the next simplex should be checked.
+                if k_sign_change is None:
+                    continue
 
-def F2(x: NDArray[np.floating]) -> NDArray[np.floating]:
-    return np.array([x[0]**2 - 4*x[1], x[1]**2 - 2*x[0] + 4*x[1]])
+                x_mid = (x_i + x_j) / 2
+                sign_F_mid = vector_sign(F, x_mid)
+                if (sign_F_i == sign_F_mid).all():
+                    x_i[:] = x_mid[:]
+                elif (sign_F_j == sign_F_mid).all():
+                    x_j[:] = x_mid[:]
 
-A = construct_admissible_polygon(F2, 1e-2, np.array([-2, -0.25]), np.array([4, 0.5]))
-print(A)
+    # Find the maximum diagonal.
+    center = None
+    diameter = 0
+    for i in range(2**(n-1)):
+        x_a = P[i]
+        x_b = P[2**n - i - 1]
+        d = np.linalg.norm(x_a - x_b)
+        if d > diameter:
+            diameter = d
+            center = (x_a + x_b) / 2
+       
+    return center
